@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2024 Hyundai Elantra Hybrid — Maintenance Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+--hyu-navy: #002C5F;
+--hyu-blue: #0F4C81;
+--hyu-light: #1B6FC0;
+--hyu-teal: #00A896;
+--hyu-teal-light: #E0F5F3;
+--hyu-silver: #C5C9CB;
+--bg: #F4F6F8;
+--surface: #FFFFFF;
+--surface2: #EEF1F5;
+--text: #0D1B2A;
+--text2: #4A5568;
+--text3: #8A96A3;
+--border: #DDE3EC;
+--green: #1A9E5C;
+--green-bg: #E8F7EF;
+--amber: #C97B0E;
+--amber-bg: #FDF3DC;
+--red: #C0392B;
+--red-bg: #FDECEA;
+--blue-bg: #E6EFF9;
+--radius: 10px;
+--radius-lg: 16px;
+--shadow: 0 1px 4px rgba(0,44,95,.08), 0 4px 16px rgba(0,44,95,.05);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+font-family: 'Outfit', sans-serif;
+background: var(--bg);
+color: var(--text);
+min-height: 100vh;
+font-size: 15px;
+}
+
+.site-header { background: var(--hyu-navy); color: white; padding: 0 24px; }
+.header-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+.vehicle-badge { display: flex; align-items: center; gap: 14px; }
+.hyu-logo { width: 42px; height: 42px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 18px; color: var(--hyu-navy); letter-spacing: -1px; flex-shrink: 0; }
+.vehicle-title h1 { font-size: 20px; font-weight: 600; letter-spacing: -.3px; line-height: 1.2; }
+.vehicle-title .sub { font-size: 12px; color: rgba(255,255,255,.6); font-weight: 400; margin-top: 2px; letter-spacing: .3px; }
+.hybrid-chip { background: var(--hyu-teal); color: white; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; letter-spacing: .5px; margin-left: 6px; }
+.header-odo { text-align: right; }
+.header-odo .miles-big { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; letter-spacing: -1px; }
+.header-odo .miles-label { font-size: 11px; color: rgba(255,255,255,.55); letter-spacing: .5px; text-transform: uppercase; }
+.odo-edit-btn { background: rgba(255,255,255,.12); border: none; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-top: 4px; font-family: 'Outfit', sans-serif; transition: background .2s; }
+.odo-edit-btn:hover { background: rgba(255,255,255,.22); }
+
+.vin-bar { background: var(--hyu-blue); padding: 8px 24px; }
+.vin-bar-inner { max-width: 1100px; margin: 0 auto; display: flex; gap: 32px; font-size: 11px; color: rgba(255,255,255,.65); letter-spacing: .3px; }
+.vin-bar-inner span b { color: rgba(255,255,255,.9); font-weight: 500; }
+
+.tabs-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,44,95,.06); }
+.tabs-inner { max-width: 1100px; margin: 0 auto; display: flex; gap: 4px; overflow-x: auto; }
+.tab-btn { padding: 14px 20px; border: none; background: none; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 500; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s, border-color .2s; white-space: nowrap; }
+.tab-btn:hover { color: var(--hyu-blue); }
+.tab-btn.active { color: var(--hyu-navy); border-bottom-color: var(--hyu-navy); }
+.tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; border-radius: 9px; font-size: 10px; font-weight: 600; padding: 0 5px; margin-left: 6px; }
+.tab-badge.red { background: var(--red-bg); color: var(--red); }
+.tab-badge.amber { background: var(--amber-bg); color: var(--amber); }
+.tab-badge.blue { background: var(--blue-bg); color: var(--hyu-blue); }
+
+.main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+.status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.stat-card { background: var(--surface); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+.stat-card .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--text3); margin-bottom: 8px; }
+.stat-card .stat-value { font-size: 28px; font-weight: 700; line-height: 1; font-family: 'Space Mono', monospace; }
+.stat-card .stat-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.stat-card.red { border-left: 3px solid var(--red); }
+.stat-card.red .stat-value { color: var(--red); }
+.stat-card.amber { border-left: 3px solid var(--amber); }
+.stat-card.amber .stat-value { color: var(--amber); }
+.stat-card.green { border-left: 3px solid var(--green); }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-card.blue { border-left: 3px solid var(--hyu-blue); }
+.stat-card.blue .stat-value { color: var(--hyu-blue); }
+
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-title { font-size: 16px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.section-title .icon { width: 28px; height: 28px; background: var(--blue-bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+.card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+
+.service-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); transition: background .15s; }
+.service-item:last-child { border-bottom: none; }
+.service-item:hover { background: var(--bg); }
+.service-name { font-weight: 500; font-size: 14px; margin-bottom: 2px; }
+.service-meta { font-size: 12px; color: var(--text3); display: flex; gap: 12px; flex-wrap: wrap; }
+.service-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.due-info { text-align: right; font-size: 12px; }
+.due-info .due-miles { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 13px; }
+.due-info .due-label { color: var(--text3); }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .3px; white-space: nowrap; }
+.pill.ok { background: var(--green-bg); color: var(--green); }
+.pill.soon { background: var(--amber-bg); color: var(--amber); }
+.pill.overdue { background: var(--red-bg); color: var(--red); }
+.pill.hybrid { background: var(--hyu-teal-light); color: #007B6E; }
+.pill.new { background: var(--blue-bg); color: var(--hyu-blue); }
+
+.log-btn { background: var(--hyu-navy); color: white; border: none; padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Outfit', sans-serif; transition: background .2s, transform .1s; white-space: nowrap; }
+.log-btn:hover { background: var(--hyu-blue); }
+.log-btn:active { transform: scale(.97); }
+.log-btn.sm { padding: 5px 10px; font-size: 11px; }
+.log-btn.outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+.log-btn.outline:hover { background: var(--bg); border-color: var(--text3); }
+.log-btn.danger { background: var(--red); }
+.log-btn.danger:hover { background: #a93226; }
+.log-btn.teal { background: var(--hyu-teal); }
+.log-btn.teal:hover { background: #008a7a; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,20,50,.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--radius-lg); padding: 28px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,44,95,.3); animation: slideUp .2s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: var(--hyu-navy); }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'Outfit', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); transition: border-color .2s, box-shadow .2s; outline: none; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--hyu-blue); box-shadow: 0 0 0 3px rgba(15,76,129,.12); background: var(--surface); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+
+.log-table { width: 100%; border-collapse: collapse; }
+.log-table th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+.log-table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.log-table tr:last-child td { border-bottom: none; }
+.log-table tr:hover td { background: var(--bg); }
+.log-table .cost { font-family: 'Space Mono', monospace; font-size: 12px; }
+.log-table .delete-btn { background: none; border: none; color: var(--text3); cursor: pointer; padding: 4px; border-radius: 4px; font-size: 14px; transition: color .2s, background .2s; }
+.log-table .delete-btn:hover { color: var(--red); background: var(--red-bg); }
+
+.sched-table { width: 100%; border-collapse: collapse; }
+.sched-table th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); white-space: nowrap; }
+.sched-table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.sched-table tr:last-child td { border-bottom: none; }
+.sched-table tr:hover td { background: var(--bg); }
+.sched-table td:first-child { font-weight: 500; }
+.mono { font-family: 'Space Mono', monospace; font-size: 12px; }
+
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+.progress-wrap { background: var(--surface2); border-radius: 4px; height: 5px; overflow: hidden; width: 80px; flex-shrink: 0; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+
+#odo-modal .modal { max-width: 340px; }
+
+.notif { position: fixed; bottom: 24px; right: 24px; background: var(--hyu-navy); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,44,95,.3); z-index: 2000; transform: translateY(80px); opacity: 0; transition: transform .3s ease, opacity .3s ease; }
+.notif.show { transform: translateY(0); opacity: 1; }
+.notif.teal { background: var(--hyu-teal); }
+
+.site-footer { text-align: center; padding: 28px; color: var(--text3); font-size: 12px; margin-top: 40px; border-top: 1px solid var(--border); }
+
+.hybrid-section-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--hyu-teal-light); color: #007B6E; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: .3px; }
+
+@media (max-width: 600px) {
+.header-inner { flex-direction: column; align-items: flex-start; gap: 10px; }
+.header-odo { text-align: left; }
+.service-item { grid-template-columns: 1fr; }
+.service-right { justify-content: flex-start; }
+.form-row { grid-template-columns: 1fr; }
+.status-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+<div class="header-inner">
+<div class="vehicle-badge">
+<div class="hyu-logo">H</div>
+<div class="vehicle-title">
+<h1>2024 Hyundai Elantra Hybrid <span class="hybrid-chip">HEV</span></h1>
+<div class="sub">Limited · Sedan 4D · 1.6L GDI Atkinson + Electric Motor</div>
+</div>
+</div>
+<div class="header-odo">
+<div class="miles-big" id="header-miles">10,329</div>
+<div class="miles-label">Current Miles</div>
+<button class="odo-edit-btn" onclick="openOdoModal()">✏ Update Mileage</button>
+</div>
+</div>
+</header>
+
+<div class="vin-bar">
+<div class="vin-bar-inner">
+<span>VIN: <b>KMHLN4DJ6RU101117</b></span>
+<span>Trans: <b>6-Speed DCT</b></span>
+<span>Fuel: <b>Regular Unleaded + Electric</b></span>
+<span>Oil: <b>0W-20 Full Synthetic</b></span>
+</div>
+</div>
+
+<div class="tabs-bar">
+<div class="tabs-inner">
+<button class="tab-btn active" onclick="showTab('overview', this)">📊 Overview</button>
+<button class="tab-btn" onclick="showTab('alerts', this)">🔔 Service Alerts <span class="tab-badge red" id="alerts-badge">0</span></button>
+<button class="tab-btn" onclick="showTab('log', this)">📋 Service Log <span class="tab-badge blue" id="log-badge">0</span></button>
+<button class="tab-btn" onclick="showTab('schedule', this)">🗓 Full Schedule</button>
+<button class="tab-btn" onclick="showTab('coverage', this)">🛡 CarvanaCare Plus</button>
+</div>
+</div>
+
+<main class="main">
+
+<div class="panel active" id="panel-overview">
+<div class="status-grid">
+<div class="stat-card red">
+<div class="stat-label">Overdue</div>
+<div class="stat-value" id="stat-overdue">—</div>
+<div class="stat-sub">service items</div>
+</div>
+<div class="stat-card amber">
+<div class="stat-label">Due Soon</div>
+<div class="stat-value" id="stat-soon">—</div>
+<div class="stat-sub">within 1,000 miles</div>
+</div>
+<div class="stat-card green">
+<div class="stat-label">Good Standing</div>
+<div class="stat-value" id="stat-ok">—</div>
+<div class="stat-sub">service items</div>
+</div>
+<div class="stat-card blue">
+<div class="stat-label">Total Services</div>
+<div class="stat-value" id="stat-logs">—</div>
+<div class="stat-sub">logged entries</div>
+</div>
+</div>
+
+<div class="section-header">
+<div class="section-title"><div class="icon">⚡</div> Upcoming &amp; Overdue</div>
+<button class="log-btn teal" onclick="openLogModal()">+ Log Service</button>
+</div>
+<div class="card" id="overview-list"></div>
+
+<div class="section-header" style="margin-top:24px;">
+<div class="section-title"><div class="icon">🔋</div> Hybrid System Items <span class="hybrid-section-badge">⚡ HEV-Specific</span></div>
+</div>
+<div class="card" id="hybrid-list"></div>
+</div>
+
+<div class="panel" id="panel-alerts">
+<div class="section-header">
+<div class="section-title"><div class="icon">🔔</div> Service Alerts</div>
+<button class="log-btn teal" onclick="openLogModal()">+ Log Service</button>
+</div>
+<div class="card" id="alerts-list"></div>
+</div>
+
+<div class="panel" id="panel-log">
+<div class="section-header">
+<div class="section-title"><div class="icon">📋</div> Service History</div>
+<button class="log-btn teal" onclick="openLogModal()">+ Log Service</button>
+</div>
+<div class="card">
+<div id="log-table-wrap">
+<div class="empty-state">
+<div class="icon">🔧</div>
+<p>No service entries yet.<br>Log your first service to get started.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="panel" id="panel-schedule">
+<div class="section-header">
+<div class="section-title"><div class="icon">🗓</div> Manufacturer Maintenance Schedule</div>
+<span style="font-size:12px;color:var(--text3);">Based on Hyundai 2024 Elantra Hybrid service guide</span>
+</div>
+<div class="card">
+<div style="overflow-x:auto;">
+<table class="sched-table" id="schedule-table">
+<thead>
+<tr>
+<th>Service Item</th>
+<th>Miles Interval</th>
+<th>Month Interval</th>
+<th>Next Due</th>
+<th>Last Service</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody id="schedule-tbody"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="panel" id="panel-coverage">
+<div class="section-header">
+<div class="section-title"><div class="icon">🛡</div> CarvanaCare Plus Coverage</div>
+<div style="display:flex;align-items:center;gap:10px;">
+<span style="font-size:12px;color:var(--text3);">$100 in-network · $350 out-of-network deductible</span>
+<span class="pill ok">✓ Active Plan</span>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;display:flex;align-items:center;gap:10px;">
+<span style="font-size:20px;">🏢</span>
+<div><div style="font-size:13px;font-weight:600;">10,000+ Locations</div><div style="font-size:11px;color:var(--text3);">In-network repair shops</div></div>
+</div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;display:flex;align-items:center;gap:10px;">
+<span style="font-size:20px;">🚗</span>
+<div><div style="font-size:13px;font-weight:600;">Rental Coverage</div><div style="font-size:11px;color:var(--text3);">While vehicle is in repair</div></div>
+</div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;display:flex;align-items:center;gap:10px;">
+<span style="font-size:20px;">📞</span>
+<div><div style="font-size:13px;font-weight:600;">24/7 Roadside</div><div style="font-size:11px;color:var(--text3);">Tow, jump, flat, lockout, gas</div></div>
+</div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;display:flex;align-items:center;gap:10px;">
+<span style="font-size:20px;">❌</span>
+<div><div style="font-size:13px;font-weight:600;">Cancel Anytime</div><div style="font-size:11px;color:var(--text3);">No long-term commitment</div></div>
+</div>
+</div>
+
+<div style="margin-bottom:18px;position:relative;">
+<input type="text" id="cov-search" placeholder="Search covered components... (e.g. inverter, fuel pump, ABS)" oninput="filterCoverage()" style="width:100%;padding:11px 14px 11px 40px;border:1px solid var(--border);border-radius:var(--radius);font-family:'Outfit',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;" onfocus="this.style.borderColor='var(--hyu-blue)'" onblur="this.style.borderColor='var(--border)'">
+<span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;">🔍</span>
+<span id="cov-count" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text3);"></span>
+</div>
+
+<div style="background:var(--red-bg);border:1px solid #f5c6c2;border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
+<span style="font-size:18px;flex-shrink:0;">⚠️</span>
+<div>
+<div style="font-weight:600;font-size:13px;color:var(--red);margin-bottom:4px;">Common Exclusions — Not Covered by CarvanaCare Plus</div>
+<div style="font-size:12px;color:#7B1818;line-height:1.7;">
+Maintenance items (oil changes, filters, tire rotations) · Wear items (brake pads/shoes, rotors, wiper blades, belts) · Tires · Glass/windows · Body panels · Interior trim/upholstery · Damage from accidents, neglect, or improper maintenance · Pre-existing conditions · Cosmetic issues (dents, scratches, paint) · Items covered by manufacturer warranty
+</div>
+</div>
+</div>
+
+<div id="cov-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;"></div>
+<div id="cov-no-results" style="display:none;" class="empty-state"><div class="icon">🔍</div><p>No matching components found.</p></div>
+</div>
+
+</main>
+
+<div class="modal-overlay" id="odo-modal" onclick="if(event.target===this)closeOdoModal()">
+<div class="modal">
+<h3>Update Odometer</h3>
+<div class="form-group">
+<label>Current Mileage</label>
+<input type="number" id="odo-input" placeholder="e.g. 10329" min="0" step="1">
+</div>
+<div class="modal-actions">
+<button class="log-btn outline" onclick="closeOdoModal()">Cancel</button>
+<button class="log-btn" onclick="saveOdo()">Save Mileage</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="log-modal" onclick="if(event.target===this)closeLogModal()">
+<div class="modal">
+<h3 id="log-modal-title">Log Service</h3>
+<div class="form-row">
+<div class="form-group">
+<label>Date</label>
+<input type="date" id="svc-date">
+</div>
+<div class="form-group">
+<label>Mileage at Service</label>
+<input type="number" id="svc-miles" placeholder="e.g. 10329" min="0">
+</div>
+</div>
+<div class="form-group">
+<label>Service Type</label>
+<select id="svc-type"></select>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Provider / Location</label>
+<input type="text" id="svc-provider" placeholder="e.g. Hyundai Dealer">
+</div>
+<div class="form-group">
+<label>Cost ($)</label>
+<input type="number" id="svc-cost" placeholder="0.00" min="0" step="0.01">
+</div>
+</div>
+<div class="form-group">
+<label>Notes / Parts Used</label>
+<textarea id="svc-notes" placeholder="e.g. Mobil 1 0W-20, OEM filter, rotated front to rear..."></textarea>
+</div>
+<div class="modal-actions">
+<button class="log-btn outline" onclick="closeLogModal()">Cancel</button>
+<button class="log-btn teal" onclick="saveService()">Save Service</button>
+</div>
+</div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<footer class="site-footer">
+2024 Hyundai Elantra Hybrid Limited HEV &nbsp;·&nbsp; VIN: KMHLN4DJ6RU101117 &nbsp;·&nbsp; Maintenance Tracker v1.1
+</footer>
+
+<script>
+const SCHEDULE = [
+{ id: 1, name: "Engine Oil & Filter", interval_mi: 7500, interval_mo: 12, hybrid: false, notes: "0W-20 Full Synthetic recommended" },
+{ id: 2, name: "Tire Rotation", interval_mi: 7500, interval_mo: 12, hybrid: false, notes: "Include torque to spec (80-100 ft-lb)" },
+{ id: 3, name: "Multi-Point Inspection", interval_mi: 7500, interval_mo: 6, hybrid: false, notes: "At each oil change visit" },
+{ id: 4, name: "Cabin Air Filter", interval_mi: 15000, interval_mo: 12, hybrid: false, notes: "" },
+{ id: 5, name: "Brake System Inspection", interval_mi: 15000, interval_mo: 12, hybrid: false, notes: "Pads, rotors, calipers, lines; check regen wear pattern" },
+{ id: 6, name: "Engine Air Filter", interval_mi: 30000, interval_mo: 24, hybrid: false, notes: "" },
+{ id: 7, name: "Brake Fluid", interval_mi: 30000, interval_mo: 24, hybrid: false, notes: "DOT 3 or DOT 4" },
+{ id: 8, name: "DCT Transmission Fluid", interval_mi: 30000, interval_mo: null, hybrid: false, notes: "Inspect at 30K; replace if contaminated" },
+{ id: 9, name: "Spark Plugs", interval_mi: 60000, interval_mo: null, hybrid: false, notes: "Iridium long-life; do not swap early" },
+{ id: 10, name: "Engine Coolant", interval_mi: 60000, interval_mo: 60, hybrid: false, notes: "First flush at 60K/5 yr; then every 30K/24 mo" },
+{ id: 11, name: "Drive Belts", interval_mi: 60000, interval_mo: null, hybrid: false, notes: "Inspect condition; replace if cracked" },
+{ id: 12, name: "Wiper Blades", interval_mi: null, interval_mo: 12, hybrid: false, notes: "" },
+{ id: 13, name: "HV Battery Inspection", interval_mi: 30000, interval_mo: 24, hybrid: true, notes: "High-voltage 1.32 kWh battery pack; dealer inspection" },
+{ id: 14, name: "12V Auxiliary Battery", interval_mi: null, interval_mo: 36, hybrid: true, notes: "Test charge capacity; replace ~every 3–4 years" },
+{ id: 15, name: "Electric Motor Cooling", interval_mi: 60000, interval_mo: 60, hybrid: true, notes: "Hybrid motor/inverter coolant system" },
+{ id: 16, name: "Hybrid System Self-Check", interval_mi: 15000, interval_mo: 12, hybrid: true, notes: "Dealer scan for HEV fault codes / BMS calibration" },
+];
+
+let state = { mileage: 10329, log: [], lastService: {} };
+
+const STORE_KEY = 'elantra_tracker_KMHLN4DJ6RU101117';
+let storageReady = false, warned = false;
+
+async function loadState() {
+let raw = null;
+try {
+if (window.storage) {
+const r = await window.storage.get(STORE_KEY, false);
+raw = r && r.value;
+}
+} catch(e) {}
+if (!raw) {
+try { raw = localStorage.getItem(STORE_KEY); } catch(e) {}
+}
+if (raw) {
+try { state = { ...state, ...JSON.parse(raw) }; } catch(e) {}
+}
+storageReady = true;
+}
+
+async function saveState() {
+if (!storageReady) return;
+const json = JSON.stringify(state);
+let ok = false;
+try {
+if (window.storage) {
+await window.storage.set(STORE_KEY, json, false);
+ok = true;
+}
+} catch(e) {}
+try {
+localStorage.setItem(STORE_KEY, json);
+ok = true;
+} catch(e) {}
+if (!ok && !warned) {
+warned = true;
+notify('Storage unavailable. Entries will not persist.');
+}
+}
+
+function fmt(n) { return Number(n).toLocaleString(); }
+
+function getStatus(sched) {
+const ls = state.lastService[sched.id];
+const lastMi = ls ? ls.miles : 0;
+const nextDueMi = sched.interval_mi ? lastMi + sched.interval_mi : null;
+const pct = nextDueMi ? Math.min(100, ((state.mileage - lastMi) / sched.interval_mi) * 100) : 0;
+
+if (nextDueMi !== null) {
+const rem = nextDueMi - state.mileage;
+if (rem <= 0) return { status: 'overdue', label: `${fmt(Math.abs(rem))} mi overdue`, pct: 100, nextDueMi };
+if (rem <= 1000) return { status: 'soon', label: `${fmt(rem)} mi left`, pct, nextDueMi };
+return { status: 'ok', label: `${fmt(rem)} mi left`, pct, nextDueMi };
+}
+if (sched.interval_mo && ls && ls.date) {
+const lastDate = new Date(ls.date);
+const dueDate = new Date(lastDate);
+dueDate.setMonth(dueDate.getMonth() + sched.interval_mo);
+const today = new Date();
+const daysLeft = Math.round((dueDate - today) / 86400000);
+if (daysLeft <= 0) return { status: 'overdue', label: `${Math.abs(daysLeft)}d overdue`, pct: 100, nextDueMi: null };
+if (daysLeft <= 30) return { status: 'soon', label: `${daysLeft} days left`, pct: 80, nextDueMi: null };
+return { status: 'ok', label: `${daysLeft} days left`, pct: 50, nextDueMi: null };
+}
+return { status: 'new', label: 'Not yet logged', pct: 0, nextDueMi };
+}
+
+function pillHtml(status) {
+const map = {
+overdue: ['overdue','⚠ Overdue'],
+soon: ['soon','● Due Soon'],
+ok: ['ok','✓ OK'],
+new: ['new','— New'],
+hybrid: ['hybrid','⚡ HEV'],
+};
+const [cls, txt] = map[status] || map.new;
+return `<span class="pill ${cls}">${txt}</span>`;
+}
+
+function progBar(pct, status) {
+const color = status === 'overdue' ? 'var(--red)' : status === 'soon' ? 'var(--amber)' : 'var(--green)';
+return `<div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>`;
+}
+
+function render() {
+updateHeader();
+renderOverview();
+renderAlerts();
+renderLog();
+renderSchedule();
+updateBadges();
+saveState();
+}
+
+function updateHeader() {
+document.getElementById('header-miles').textContent = fmt(state.mileage);
+document.getElementById('odo-input').value = state.mileage;
+}
+
+function renderOverview() {
+let overdue = 0, soon = 0, ok = 0;
+const alertItems = [];
+const hybridItems = [];
+
+SCHEDULE.forEach(s => {
+const st = getStatus(s);
+if (st.status === 'overdue') overdue++;
+else if (st.status === 'soon') soon++;
+else if (st.status === 'ok') ok++;
+
+if (s.hybrid) {
+hybridItems.push(serviceItemHtml(s, st, true));
+} else if (st.status !== 'ok') {
+alertItems.push({ html: serviceItemHtml(s, st), order: st.status === 'overdue' ? 0 : 1 });
+}
+});
+
+document.getElementById('stat-overdue').textContent = overdue;
+document.getElementById('stat-soon').textContent = soon;
+document.getElementById('stat-ok').textContent = ok;
+document.getElementById('stat-logs').textContent = state.log.length;
+
+const list = alertItems.sort((a,b) => a.order - b.order).map(x => x.html).join('');
+document.getElementById('overview-list').innerHTML = list || '<div class="empty-state"><div class="icon">✅</div><p>All services are up to date!</p></div>';
+document.getElementById('hybrid-list').innerHTML = hybridItems.join('') || '<div class="empty-state"><p>Log your first HEV service.</p></div>';
+}
+
+function serviceItemHtml(sched, st, isHybrid = false) {
+const ls = state.lastService[sched.id];
+const lastMiTxt = ls ? `Last: ${fmt(ls.miles)} mi` : 'Never logged';
+const lastDateTxt = ls && ls.date ? ` · ${ls.date}` : '';
+const intTxt = [
+sched.interval_mi ? `Every ${fmt(sched.interval_mi)} mi` : null,
+sched.interval_mo ? `Every ${sched.interval_mo} mo` : null
+].filter(Boolean).join(' / ');
+const dueTxt = st.nextDueMi ? `<div class="due-miles">${fmt(st.nextDueMi)} mi</div><div class="due-label">due at</div>` : '';
+
+return `
+<div class="service-item">
+<div>
+<div class="service-name">${sched.name} ${isHybrid ? pillHtml('hybrid') : ''}</div>
+<div class="service-meta">
+<span>${intTxt}</span>
+<span>${lastMiTxt}${lastDateTxt}</span>
+${sched.notes ? `<span style="color:var(--text3)">${sched.notes}</span>` : ''}
+</div>
+</div>
+<div class="service-right">
+<div class="due-info">${dueTxt}</div>
+${progBar(st.pct, st.status)}
+${pillHtml(st.status)}
+<button class="log-btn sm" onclick="openLogModal(${sched.id})">Log</button>
+</div>
+</div>`;
+}
+
+function renderAlerts() {
+const items = SCHEDULE.map(s => ({ s, st: getStatus(s) }))
+.filter(({ st }) => st.status === 'overdue' || st.status === 'soon')
+.sort((a,b) => (a.st.status === 'overdue' ? 0 : 1) - (b.st.status === 'overdue' ? 0 : 1));
+
+document.getElementById('alerts-list').innerHTML = items.length
+? items.map(({ s, st }) => serviceItemHtml(s, st, s.hybrid)).join('')
+: '<div class="empty-state"><div class="icon">✅</div><p>No alerts — all services are up to date!</p></div>';
+}
+
+function renderLog() {
+const wrap = document.getElementById('log-table-wrap');
+if (!state.log.length) {
+wrap.innerHTML = '<div class="empty-state"><div class="icon">🔧</div><p>No service entries yet.<br>Log your first service to get started.</p></div>';
+return;
+}
+const sorted = [...state.log].sort((a,b) => (b.miles||0) - (a.miles||0));
+const rows = sorted.map(e => {
+const svc = SCHEDULE.find(s => s.id === e.schedId);
+return `<tr>
+<td>${e.date || '—'}</td>
+<td class="mono">${e.miles ? fmt(e.miles) : '—'}</td>
+<td><b>${svc ? svc.name : e.custom || 'Service'}</b>${e.provider ? `<br><span style="color:var(--text3);font-size:12px">${e.provider}</span>` : ''}</td>
+<td class="cost">${e.cost ? '$' + parseFloat(e.cost).toFixed(2) : '—'}</td>
+<td style="max-width:200px;color:var(--text2)">${e.notes || '—'}</td>
+<td><button class="delete-btn" onclick="deleteLog('${e.id}')">✕</button></td>
+</tr>`;
+}).join('');
+
+const total = state.log.reduce((acc,e) => acc + (parseFloat(e.cost)||0), 0);
+
+wrap.innerHTML = `
+<table class="log-table">
+<thead><tr><th>Date</th><th>Miles</th><th>Service</th><th>Cost</th><th>Notes</th><th></th></tr></thead>
+<tbody>${rows}</tbody>
+<tfoot>
+<tr>
+<td colspan="3" style="font-size:12px;color:var(--text3);padding:10px 16px">${state.log.length} service record${state.log.length !== 1 ? 's' : ''}</td>
+<td class="mono" style="font-weight:600;padding:10px 16px">$${total.toFixed(2)}</td>
+<td colspan="2"></td>
+</tr>
+</tfoot>
+</table>`;
+}
+
+function renderSchedule() {
+const tbody = document.getElementById('schedule-tbody');
+tbody.innerHTML = SCHEDULE.map(s => {
+const st = getStatus(s);
+const ls = state.lastService[s.id];
+const intMi = s.interval_mi ? `${fmt(s.interval_mi)} mi` : '—';
+const intMo = s.interval_mo ? `${s.interval_mo} months` : '—';
+const nextDue = st.nextDueMi ? `${fmt(st.nextDueMi)} mi` : (st.status === 'new' ? 'Not logged' : 'Time-based');
+const lastSvc = ls ? `${fmt(ls.miles)} mi${ls.date ? ` (${ls.date})` : ''}` : '—';
+return `<tr>
+<td>${s.name} ${s.hybrid ? pillHtml('hybrid') : ''}</td>
+<td class="mono">${intMi}</td>
+<td>${intMo}</td>
+<td class="mono">${nextDue}</td>
+<td class="mono" style="color:var(--text3)">${lastSvc}</td>
+<td>${pillHtml(st.status)}</td>
+<td style="color:var(--text3);font-size:12px">${s.notes}</td>
+</tr>`;
+}).join('');
+}
+
+function updateBadges() {
+const items = SCHEDULE.map(s => getStatus(s));
+const alertCount = items.filter(s => s.status === 'overdue' || s.status === 'soon').length;
+document.getElementById('alerts-badge').textContent = alertCount;
+document.getElementById('alerts-badge').style.display = alertCount ? '' : 'none';
+document.getElementById('log-badge').textContent = state.log.length;
+document.getElementById('log-badge').style.display = state.log.length ? '' : 'none';
+}
+
+function showTab(name, btn) {
+document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+document.getElementById('panel-' + name).classList.add('active');
+btn.classList.add('active');
+}
+
+function openOdoModal() {
+document.getElementById('odo-input').value = state.mileage;
+document.getElementById('odo-modal').classList.add('open');
+}
+function closeOdoModal() { document.getElementById('odo-modal').classList.remove('open'); }
+function saveOdo() {
+const v = parseInt(document.getElementById('odo-input').value);
+if (isNaN(v) || v < 0) return;
+state.mileage = v;
+closeOdoModal();
+render();
+notify('Mileage updated to ' + fmt(v) + ' miles', 'teal');
+}
+
+function openLogModal(preselect) {
+const sel = document.getElementById('svc-type');
+sel.innerHTML = SCHEDULE.map(s => `<option value="${s.id}" ${s.id === preselect ? 'selected' : ''}>${s.name}${s.hybrid ? ' ⚡' : ''}</option>`).join('');
+sel.innerHTML += `<option value="custom">Other / Custom</option>`;
+document.getElementById('svc-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('svc-miles').value = state.mileage;
+document.getElementById('svc-provider').value = '';
+document.getElementById('svc-cost').value = '';
+document.getElementById('svc-notes').value = '';
+document.getElementById('log-modal-title').textContent = 'Log Service';
+document.getElementById('log-modal').classList.add('open');
+}
+function closeLogModal() { document.getElementById('log-modal').classList.remove('open'); }
+
+function saveService() {
+const schedId = parseInt(document.getElementById('svc-type').value) || null;
+const date = document.getElementById('svc-date').value;
+const miles = parseInt(document.getElementById('svc-miles').value) || state.mileage;
+const provider = document.getElementById('svc-provider').value.trim();
+const cost = document.getElementById('svc-cost').value;
+const notes = document.getElementById('svc-notes').value.trim();
+
+if (!date) { alert('Please enter a service date.'); return; }
+
+const entry = { id: Date.now().toString(), schedId, date, miles, provider, cost, notes };
+state.log.push(entry);
+
+if (schedId && (!state.lastService[schedId] || state.lastService[schedId].miles <= miles)) {
+state.lastService[schedId] = { miles, date };
+}
+
+closeLogModal();
+render();
+notify('Service logged successfully!', 'teal');
+}
+
+function deleteLog(id) {
+if (!confirm('Delete this service entry?')) return;
+state.log = state.log.filter(e => e.id !== id);
+state.lastService = {};
+state.log.forEach(e => {
+if (e.schedId && (!state.lastService[e.schedId] || state.lastService[e.schedId].miles < e.miles)) {
+state.lastService[e.schedId] = { miles: e.miles, date: e.date };
+}
+});
+render();
+notify('Entry deleted.');
+}
+
+function notify(msg, type) {
+const el = document.getElementById('notif');
+el.textContent = msg;
+el.className = 'notif' + (type === 'teal' ? ' teal' : '');
+el.classList.add('show');
+setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+const COVERAGE = [
+{
+cat: "⚡ Electric / Hybrid System", accent: "#007B6E", bg: "#E0F5F3",
+items: ["Drive Motor/Generator","High Voltage Battery","Inverter","On-Board Charger","AC Charger","Battery Current Sensor","Battery Pack","Battery Temp Sensor","DC DC Converter","Vehicle Control Unit (VCU)"]
+},
+{
+cat: "🔧 Engine", accent: "#0F4C81", bg: "#E6EFF9",
+items: ["Balance Shafts","Balance Shaft Chains","Balance Shaft Sprockets","Cam Bearings","Cam Bolts","Cam Cover","Cam Follower","Camshafts","Camshaft Sprockets","Compression Rings","Connecting Rods","Crankshaft","Crankshaft Pulley","Crankshaft Sprockets","Cylinder Block","Cylinder Head Bolts","Cylinder Heads","Engine Mounts","Exhaust Manifolds","Exhaust Valves","Flex Plate","Harmonic Balancer","Intake Manifold","Intake Valves","Intermediate Shaft Lifters","Main Bearing Caps","Main Bearings","Oil Pan","Oil Pressure Relief Spring","Oil Pump","Oil Pump Gears","Oil Pump Pickup","Oil Rings","Piston Rings","Pistons","Pushrods","Rocker Arm Studs","Rocker Arms","Rod Bearings","Silent Shaft","Supercharger","Tappets","Thrust Pins","Timing Belt","Timing Belt Tensioner","Timing Gears","Timing Sprockets","Turbocharger","Valve Covers","Valve Keepers","Valve Lifters","Valve Seats","Valve Springs","Valve Stem Guides","Valve Stem Seals","Wrist Pins","Engine Control Module (ECM)","Engine Oil Cooler","Engine Wiring Harness","Oil Filter Adaptor Housing","Variable Valve Timing Actuator","Variable Valve Timing Solenoid","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "⚙️ Transmission / Transfer Case", accent: "#3B6D11", bg: "#EAF3DE",
+items: ["Accumulator Pistons","Accumulator Rings","Accumulator Seal Bands","Bearings","Bell Housing","Bushings","Case","Chains","Check Balls","Cooler","Counter Shafts","Detent Cable","Drive Link","Drive Plate","Drums","Dust Cap","Flex Plate","Front Bands","Gaskets","Gears","Governor","Governor Support","Impeller Hub","Input Shaft","Input Turbine","Intermediate Bands","Internal 4x4 Actuator","Kickdown Bands","Kickdown Servo","Main Shaft","Manual Shaft","Modulator Valve","Multifunction Valves","Oil Pan","Oil Pump","Oil Pump Cover","Output Gears","Output Shaft","Output Shaft Bearings","Parking Lock Sprag","Parking Pawl","Pistons","Planetary Gear Carrier","Planetary Gears","Internal Pressure Sensors","Internal Speed Sensors","Reaction Gear Set","Rear Bands","Reverse Bands","Reverse Servo","Ring Gears","Roll Pins","Roller Clutches","Servo Rings","Shafts","Shift Cover","Shift Forks","Shift Valves","Side Cover","Snap Rings","Speedometer Drive Gear","Speedometer Driven Gear","Sprags","Springs","Sprocket Supports","Sprockets","Stator","Stator Shaft","Sun Gears","Synchronizer Hub","Synchronizer Rings","Synchros","Internal Temperature Sensor","Thrust Washers","Throttle Valve","Torque Converter","Transaxle","Transaxle Case","Transmission Mounts","Turbine","Vacuum Modulator","Valve Body","Valve Solenoids","Clutch Master Cylinder","Clutch Pilot Bearing","Clutch Slave Cylinder","Clutch Throw Out Bearing","Electronic Shift Control Unit","Flywheel","Pressure Plate","Range Sensor","Transmission Control Module (TCM)","Transmission Wiring Harness","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "🔄 Front / Rear Wheel Drive", accent: "#854F0B", bg: "#FAEEDA",
+items: ["Axles","Axle Shaft","Carrier Bearing","Center Support Bearings","CV Joints","Differential Carrier","Differential Cover","Differential Housing","Drive Shaft","Half Shafts","Locking Hubs","Pinion Gear","Positraction Clutches","Ring Gears","Side Bearings","Side Gears","Slip Joints","Spider Gears","Universal Joints","Wheel Bearings","Yokes","Center Support Bearing","CV Boots","Differential Covers","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "⛽ Fuel & Emissions", accent: "#853B1D", bg: "#FAECE7",
+items: ["Evap Canister","Fuel Injector","Fuel Injection Pump","Fuel Level Sensor","Fuel Pump","Fuel Pressure Regulator","Fuel Rail Pressure Sensor","Fuel Tank Sending Unit","Intake Air Temperature Sensor","Leak Detection Pump","MAP Sensor","Mass Airflow Sensor","Purge Valve/Solenoid","Throttle Body","Throttle Position Sensor","Solenoid Vent Valve","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "❄️ Heating & A/C", accent: "#185FA5", bg: "#E6F1FB",
+items: ["A/C Compressor","Accumulator","Blower Motor","Blower Motor Resistor","Blower Motor Switch","Compressor Clutch","Condenser","Condenser Fan Motor","Coolant Heater Controller","Evaporator Core","Expansion Valve","Heater Core","HVAC Actuators","HVAC Control Unit","HVAC Control Head","Hybrid/Electric Coolant Heater","Interior/Exterior Temperature Sensor","Orifice Tube","Receiver/Dryer","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "🔩 Steering", accent: "#533AB7", bg: "#EEEDFE",
+items: ["Electric Steering Motor","EVO Sensor","Power Steering Pump","Rack and Pinion Assembly","Steering Angle Sensor","Steering Gear","Steering Knuckles","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "🚗 Suspension", accent: "#993556", bg: "#FBEAF0",
+items: ["Ball Joints","Control Arms","Control Arm Bushings","Control Arm Shafts","Electric Level Control Actuator","Electronic Level Control Compressor","Electronic Level Control Height Sensor","Electronic Level Control Module","Spindles","Stabilizer Bar","Stabilizer Bar Bushings","Torsion Bar","Torsion Bar Bushings","Torsion Bar Mounts","Track Bar","Track Bar Bushings","Wheel Bearings","Yaw Rate Sensor","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "🛑 Brake System", accent: "#A32D2D", bg: "#FCEBEB",
+items: ["ABS Accumulator","ABS Control Module","ABS Hydraulic Pump/Motor Assembly","ABS Wheel Speed Sensors","Brake Booster","Caliper(s)","Master Cylinder","Vacuum Pump","Wheel Cylinder","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "🌡️ Cooling System", accent: "#0F6E56", bg: "#E1F5EE",
+items: ["Engine Cooling Fan Clutch","Engine Coolant Level Sensor","Engine Coolant Temperature Sensor","Thermostat","Turbo Charger Intercooler","Water Pump","Radiator","Cooling Fan Motor","Seals and Gaskets for Covered Components"]
+},
+{
+cat: "💡 Electrical", accent: "#5F5E5A", bg: "#F1EFE8",
+items: ["HVAC Control Module","Accelerator Pedal Position Sensor","Air Bag Module","Air Bag Sensor","Alternator","Body Control Module (BCM)","Camshaft Sensor","Clock Spring","Convertible Top Motor","Convertible Top Switch","Crankshaft Sensor","Dash Light Dimmer Switch","Hazard Warning Switch","Instrument Cluster","Ignition Coil/Coil Pack","Ignition Module","Ignition Lock Cylinder","Impact Sensor","Keyless Entry Receiver","Keyless Entry Remote","Knock Sensor","Oil Level Sensor","Oil Pressure Sending Unit","Oxygen Sensor","Power Door Lock Actuators","Power Hatch Lift Motor","Power Mirror Motor","Power Seat Motors","Power Window Motors and Regulators","Powertrain Control Module (PCM)","Rear Hatch Motor","Rear View Camera","Sliding Door Motor","Starter Motor","Tire Pressure Sensors","Window Washer Pump","Window Wiper Motor","Wiring Harness","Seals and Gaskets for Covered Components"]
+}
+];
+
+function renderCoverage(filter) {
+const q = (filter || '').toLowerCase().trim();
+const grid = document.getElementById('cov-grid');
+const noRes = document.getElementById('cov-no-results');
+let totalMatches = 0;
+let html = '';
+
+COVERAGE.forEach(cat => {
+const matched = q ? cat.items.filter(i => i.toLowerCase().includes(q) || cat.cat.toLowerCase().includes(q)) : cat.items;
+if (!matched.length) return;
+totalMatches += matched.length;
+
+const itemsHtml = matched.map(item => {
+const displayItem = q && item.toLowerCase().includes(q)
+? item.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'), '<mark style="background:#FFF3CC;border-radius:2px;padding:0 2px;">$1</mark>')
+: item;
+return `<div style="font-size:12px;padding:3px 0;border-bottom:1px solid ${cat.bg};color:var(--text2);display:flex;align-items:center;gap:6px;">
+<span style="width:5px;height:5px;border-radius:50%;background:${cat.accent};flex-shrink:0;display:inline-block;"></span>${displayItem}
+</div>`;
+}).join('');
+
+html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+<div style="background:${cat.bg};padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+<div style="font-size:13px;font-weight:600;color:${cat.accent};">${cat.cat}</div>
+<div style="font-size:11px;font-weight:600;color:${cat.accent};background:white;padding:2px 8px;border-radius:10px;">${matched.length}</div>
+</div>
+<div style="padding:10px 16px;max-height:240px;overflow-y:auto;">${itemsHtml}</div>
+</div>`;
+});
+
+const el = document.getElementById('cov-count');
+if (el) el.textContent = q ? totalMatches + ' result' + (totalMatches !== 1 ? 's' : '') : '';
+
+if (html) {
+grid.innerHTML = html;
+grid.style.display = 'grid';
+noRes.style.display = 'none';
+} else {
+grid.style.display = 'none';
+noRes.style.display = 'block';
+}
+}
+
+function filterCoverage() {
+renderCoverage(document.getElementById('cov-search').value);
+}
+
+loadState().then(() => { render(); renderCoverage(); });
+</script>
+</body>
+</html>
